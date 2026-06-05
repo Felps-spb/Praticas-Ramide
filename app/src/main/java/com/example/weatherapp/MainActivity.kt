@@ -4,68 +4,66 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.material3.TopAppBar
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.navigation.compose.rememberNavController
+import com.example.weatherapp.ui.nav.BottomNavBar
+import com.example.weatherapp.ui.nav.BottomNavItem
+import com.example.weatherapp.ui.nav.MainNavHost
 import com.example.weatherapp.ui.theme.WeatherappTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             WeatherappTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    HomePage(modifier = Modifier.padding(innerPadding))
+                val navController = rememberNavController()
+                Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            title = { Text("Bem-vindo/a!") },
+                            actions = {
+                                IconButton(onClick = { finish() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                                        contentDescription = "Localized description"
+                                    )
+                                }
+                            }
+                        )
+                    },
+                    bottomBar = {
+                        val items = listOf(
+                            BottomNavItem.HomeButton,
+                            BottomNavItem.ListButton,
+                            BottomNavItem.MapButton,
+                        )
+                        BottomNavBar(navController = navController, items)
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(onClick = { }) {
+                            Icon(Icons.Default.Add, contentDescription = "Adicionar")
+                        }
+                    }
+                ) { innerPadding ->
+                    Box(modifier = Modifier.padding(innerPadding)) {
+                        MainNavHost(navController = navController)
+                    }
                 }
             }
-        }
-    }
-}
-
-// Parte 3 Passo 1: tela HomePage com mensagem de boas-vindas e botão Sair
-@Preview(showBackground = true)
-@Composable
-fun HomePage(modifier: Modifier = Modifier) {
-    val activity = LocalContext.current.findActivity()
-
-    Column(
-        modifier = modifier
-            .padding(24.dp)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = CenterHorizontally
-    ) {
-        Text(
-            text = "Olá, seja bem-vindo/a!",
-            fontSize = 28.sp
-        )
-
-        Spacer(modifier = modifier.size(16.dp))
-
-        Text(
-            text = "Você está na página inicial.",
-            fontSize = 16.sp
-        )
-
-        Spacer(modifier = modifier.size(32.dp))
-
-        // Parte 3 Passo 3: finish() encerra a atividade e volta para LoginActivity
-        Button(onClick = { activity?.finish() }) {
-            Text("Sair")
         }
     }
 }

@@ -1,7 +1,5 @@
 package com.example.weatherapp
 
-import android.content.Context
-import android.content.ContextWrapper
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
