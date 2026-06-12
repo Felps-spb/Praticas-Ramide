@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import com.google.firebase.auth.FirebaseAuth
+import com.example.weatherapp.db.fb.FBDatabase
+import com.example.weatherapp.db.fb.toFBUser
+import com.example.weatherapp.model.User
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -123,6 +126,7 @@ fun RegisterPage(modifier: Modifier = Modifier) {
                                 if (task.isSuccessful) {
                                     Toast.makeText(activity,
                                         "Registro OK!", Toast.LENGTH_LONG).show()
+                                    FBDatabase().register(User(name, email).toFBUser())
                                 } else {
                                     Toast.makeText(activity,
                                         "Registro FALHOU!", Toast.LENGTH_LONG).show()
