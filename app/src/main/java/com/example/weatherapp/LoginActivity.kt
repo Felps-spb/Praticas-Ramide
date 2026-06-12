@@ -5,6 +5,7 @@ import android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -98,12 +99,14 @@ fun LoginPage(modifier: Modifier = Modifier) {
             Button(
                 onClick = {
                     activity?.let {
-                        Toast.makeText(it, "Login OK!", Toast.LENGTH_LONG).show()
-                        it.startActivity(
-                            Intent(it, MainActivity::class.java).setFlags(
-                                FLAG_ACTIVITY_SINGLE_TOP
-                            )
-                        )
+                        FirebaseAuth.getInstance().signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(activity) { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(activity, "Login OK!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(activity, "Login FALHOU!", Toast.LENGTH_LONG).show()
+                                }
+                            }
                     }
                 },
                 enabled = email.isNotEmpty() && password.isNotEmpty()

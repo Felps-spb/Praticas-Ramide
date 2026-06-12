@@ -3,6 +3,7 @@ package com.example.weatherapp
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import com.google.firebase.auth.FirebaseAuth
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -117,9 +118,16 @@ fun RegisterPage(modifier: Modifier = Modifier) {
             Button(
                 onClick = {
                     activity?.let {
-                        Toast.makeText(it, "Registro realizado!", Toast.LENGTH_LONG).show()
-                        // Parte 4 Passo 5: finaliza e volta para LoginActivity
-                        it.finish()
+                        FirebaseAuth.getInstance().createUserWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(activity) { task ->
+                                if (task.isSuccessful) {
+                                    Toast.makeText(activity,
+                                        "Registro OK!", Toast.LENGTH_LONG).show()
+                                } else {
+                                    Toast.makeText(activity,
+                                        "Registro FALHOU!", Toast.LENGTH_LONG).show()
+                                }
+                            }
                     }
                 },
                 enabled = name.isNotEmpty()

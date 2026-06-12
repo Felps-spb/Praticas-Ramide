@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.kotlin.serialization)
     id ("com.google.android.libraries.mapsplatform.secrets-gradle-plugin")
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
@@ -38,6 +39,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -51,6 +53,7 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation("androidx.navigation:navigation-compose:2.9.8")
+    implementation(libs.firebase.auth)
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.10.0")
