@@ -1,5 +1,6 @@
 package com.example.weatherapp
 
+import android.Manifest
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -18,6 +19,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,8 +56,8 @@ class MainActivity : ComponentActivity() {
 
                 val currentRoute = navController.currentBackStackEntryAsState()
                 val showButton = currentRoute.value?.destination?.hasRoute(Route.List::class) == true
-                val launcher = rememberLauncherForActivityResult(contract =
-                    ActivityResultContracts.RequestPermission(), onResult = {} )
+                val launcher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.RequestPermission(), onResult = {})
 
                 if (showDialog) CityDialog(
                     onDismiss = { showDialog = false },
@@ -69,7 +71,7 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = {
-                                val name = viewModel.user?.name?:"[carregando...]"
+                                val name = viewModel.user?.name ?: "[carregando...]"
                                 Text("Bem-vindo/a! $name")
                             },
                             actions = {
@@ -88,7 +90,7 @@ class MainActivity : ComponentActivity() {
                             BottomNavItem.ListButton,
                             BottomNavItem.MapButton,
                         )
-                        BottomNavBar(navController = navController, items)
+                        BottomNavBar(viewModel, navController, items)
                     },
                     floatingActionButton = {
                         if (showButton) {
@@ -99,11 +101,22 @@ class MainActivity : ComponentActivity() {
                     }
                 ) { innerPadding ->
                     Box(modifier = Modifier.padding(innerPadding)) {
-                        launcher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
+                        launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
                         MainNavHost(
                             navController = navController,
                             viewModel = viewModel
                         )
+                    }
+                    LaunchedEffect(viewModel.page) {
+                        navController.navigate(viewModel.page) {
+                            navController.graph.startDestinationRoute?.let {
+                                popUpTo(it) {
+                                    saveState = true
+                                }
+                            }
+                            restoreState = true
+                            launchSingleTop = true
+                        }
                     }
                 }
             }

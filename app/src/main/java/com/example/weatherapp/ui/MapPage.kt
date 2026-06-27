@@ -69,11 +69,15 @@ fun MapPage(
             icon = BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)
         )
         viewModel.cities.forEach {
-            if (it.location != null) {
+            val loc = it.location
+            if (loc != null) {
+                val weather = viewModel.weather(it.name)
+                val desc = if (weather == com.example.weatherapp.model.Weather.LOADING) "Carregando clima..."
+                else weather.desc
                 Marker(
-                    state = MarkerState(position = it.location),
+                    state = MarkerState(position = loc),
                     title = it.name,
-                    snippet = "${it.location}"
+                    snippet = desc
                 )
             }
         }

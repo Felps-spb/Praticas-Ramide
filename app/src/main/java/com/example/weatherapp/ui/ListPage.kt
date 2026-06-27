@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.model.City
+import com.example.weatherapp.model.Weather
 
 @Preview(showBackground = true)
 @Composable
@@ -41,11 +42,13 @@ fun ListPage(
             .fillMaxSize()
             .padding(8.dp)
     ) {
-        items(cityList, key = { it.name }) { city ->
+        items(items = cityList, key = { it.name }) { city ->
             CityItem(
                 city = city,
+                weather = viewModel.weather(city.name),
                 onClick = {
-                    Toast.makeText(context, "Cidade: ${city.name}", Toast.LENGTH_SHORT).show()
+                    viewModel.city = city.name
+                    viewModel.page = com.example.weatherapp.ui.nav.Route.Home
                 },
                 onClose = {
                     viewModel.remove(city)
@@ -59,10 +62,12 @@ fun ListPage(
 @Composable
 fun CityItem(
     city: City,
+    weather: Weather,
     onClick: () -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val desc = if (weather == Weather.LOADING) "Carregando clima..." else weather.desc
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -75,13 +80,15 @@ fun CityItem(
             contentDescription = ""
         )
         Spacer(modifier = Modifier.size(12.dp))
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = modifier.weight(1f)) {
             Text(
+                modifier = Modifier,
                 text = city.name,
                 fontSize = 24.sp
             )
             Text(
-                text = city.weather ?: "Carregando clima...",
+                modifier = Modifier,
+                text = desc,
                 fontSize = 16.sp
             )
         }
