@@ -8,9 +8,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.getDrawable
+import androidx.core.graphics.drawable.toBitmap
+import androidx.core.graphics.scale
 import com.example.weatherapp.MainViewModel
+import com.example.weatherapp.R
+import com.example.weatherapp.model.Weather
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.GoogleMap
@@ -20,7 +24,6 @@ import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerState
 import com.google.maps.android.compose.rememberCameraPositionState
 
-@Preview(showBackground = true)
 @Composable
 fun MapPage(
     modifier: Modifier = Modifier,
@@ -72,12 +75,16 @@ fun MapPage(
             val loc = it.location
             if (loc != null) {
                 val weather = viewModel.weather(it.name)
-                val desc = if (weather == com.example.weatherapp.model.Weather.LOADING) "Carregando clima..."
-                else weather.desc
+                val image = weather.bitmap ?:
+                    getDrawable(context, R.drawable.loading)!!.toBitmap()
+                val marker = BitmapDescriptorFactory
+                    .fromBitmap(image.scale(120, 120))
+                val desc = if (weather == Weather.LOADING)
+                    "Carregando clima..." else weather.desc
                 Marker(
                     state = MarkerState(position = loc),
-                    title = it.name,
-                    snippet = desc
+                    icon = marker,
+                    title = it.name, snippet = desc
                 )
             }
         }
