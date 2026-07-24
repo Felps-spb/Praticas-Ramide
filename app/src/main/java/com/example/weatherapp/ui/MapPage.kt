@@ -1,8 +1,10 @@
 package com.example.weatherapp.ui
 
 import android.content.pm.PackageManager
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -12,8 +14,10 @@ import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getDrawable
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.graphics.scale
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.weatherapp.MainViewModel
 import com.example.weatherapp.R
+import com.example.weatherapp.model.City
 import com.example.weatherapp.model.Weather
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.maps.android.compose.GoogleMap
@@ -39,6 +43,16 @@ fun MapPage(
         )
     }
 
+    val cities = viewModel.cities.collectAsStateWithLifecycle(initialValue = emptyMap<String, City>()).value
+    val weatherMap = viewModel.weather.collectAsStateWithLifecycle(initialValue = emptyMap<String, Weather>()).value
+
+    val cityList = cities.values.toList()
+    cityList.forEach { city ->
+        LaunchedEffect(city.name) {
+            viewModel.loadWeather(city.name)
+        }
+    }
+
     GoogleMap(
         modifier = modifier.fillMaxSize(),
         onMapClick = {
@@ -48,10 +62,14 @@ fun MapPage(
         properties = MapProperties(isMyLocationEnabled = hasLocationPermission),
         uiSettings = MapUiSettings(myLocationButtonEnabled = true)
     ) {
-        viewModel.cities.forEach {
-            val loc = it.location
-            if (loc != null) {
-                val weather = viewModel.weather(it.name)
+        cities.values.forEach { city ->
+            if (city.location != null) {
+                val weather = weatherMap[city.name] ?: Weather.LOADING
+
+                LaunchedEffect(weather) {
+                    viewModel.loadBitmap(city.name)
+                }
+
                 val image = weather.bitmap ?:
                     getDrawable(context, R.drawable.loading)!!.toBitmap()
                 val marker = BitmapDescriptorFactory
@@ -59,9 +77,9 @@ fun MapPage(
                 val desc = if (weather == Weather.LOADING)
                     "Carregando clima..." else weather.desc
                 Marker(
-                    state = MarkerState(position = loc),
+                    state = MarkerState(position = city.location!!),
                     icon = marker,
-                    title = it.name, snippet = desc
+                    title = city.name, snippet = desc
                 )
             }
         }

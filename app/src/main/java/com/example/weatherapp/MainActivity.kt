@@ -28,13 +28,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.core.util.Consumer
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.example.weatherapp.api.WeatherService
 import com.example.weatherapp.db.fb.FBDatabase
+import com.example.weatherapp.db.local.LocalDatabase
 import com.example.weatherapp.monitor.ForecastMonitor
+import com.example.weatherapp.repo.Repository
 import com.example.weatherapp.ui.CityDialog
 import com.example.weatherapp.ui.nav.BottomNavBar
 import com.example.weatherapp.ui.nav.BottomNavItem
@@ -52,12 +55,19 @@ class MainActivity : ComponentActivity() {
             WeatherappTheme {
                 val navController = rememberNavController()
                 val fbDB = remember { FBDatabase() }
+                val localDB = remember {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "default"
+                    LocalDatabase(this, uid)
+                }
+                val repository = remember { Repository(fbDB, localDB) }
                 val weatherService = remember { WeatherService(this) }
                 val forecastMonitor = remember { ForecastMonitor(this) }
                 val viewModel: MainViewModel = viewModel(
-                    factory = MainViewModelFactory(fbDB, weatherService, forecastMonitor)
+                    factory = MainViewModelFactory(repository, weatherService, forecastMonitor)
                 )
                 var showDialog by remember { mutableStateOf(false) }
+
+                val user = viewModel.user.collectAsStateWithLifecycle(null).value
 
                 val currentRoute = navController.currentBackStackEntryAsState()
                 val showButton = currentRoute.value?.destination?.hasRoute(Route.List::class) == true
@@ -76,7 +86,7 @@ class MainActivity : ComponentActivity() {
                     topBar = {
                         TopAppBar(
                             title = {
-                                val name = viewModel.user?.name ?: "[carregando...]"
+                                val name = user?.name ?: "[carregando...]"
                                 Text("Bem-vindo/a! $name")
                             },
                             actions = {
